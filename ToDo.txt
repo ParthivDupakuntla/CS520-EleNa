@@ -1,6 +1,0 @@
-To Do:
-    Key Functional and Non Functional Requirements
-    Architecture Diagram
-    UI design mockup
-    Tech Stack
-    Evaluation Metrics
