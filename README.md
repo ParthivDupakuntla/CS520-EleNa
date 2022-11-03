@@ -1,4 +1,4 @@
-#EleNa - Elevation Based Navigation System
+###EleNa - Elevation Based Navigation System
 Current routing systems’ shortest path is not necessarily the shortest path with elevation gain considered.
 The goal of this project is to design a navigation system that takes the elevation gain in a route into account.
 We consider two features of elevation gain - maximum elevation gain and minimum elevation gain.
