@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EleNa</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!--    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!--    <script type="text/javascript" src="{{ url_for('static', filename='js/map.js') }}"></script>-->
+    <script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+      });
+    </script>
+    <style>
+        .form-control {
+  display: inline;
+  width: 20%}
+  .form-select{
+  width:10%;
+  display: inline;}
+
+.form-group{
+align:center
+}
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row navbar-expand-lg navbar-dark bg-dark shadow-sm p-1">
+        <center>
+            <a href="#" class="navbar-brand">
+                <span class="font-weight-bold">EleNa: Elevation-based Navigation Application</span>
+            </a>
+        </center>
+    </div>
+    <div class="row p-2">
+<!--        <span>-->
+<!--            <div class="row border p-2">-->
+                <form action="/new" method="post" role="form" id="dataForm">
+<!--                    <div class="form-group pt-1">-->
+<!--                        <label>Source:</label>-->
+                        <input class="form-control" id="start" name="start" class="controls" type="text" placeholder="Enter source" autocomplete="on" runat="server">
+<!--                    </div>-->
+<!--                    <div class="form-group pt-2">-->
+<!--                        <label>Destination:</label>-->
+                        <input class="form-control" id="end" name="end" class="controls" type="text" placeholder="Enter destination">
+                    <label>Algorithm:&nbsp;&nbsp;
+<!--                        <span class="iconify" data-icon="bi:info-circle" data-toggle="tooltip" data-placement="top" title="Dijkstra considers all the possible paths, while Astar optimizes for elevation preference while using fixed elevation gains."></span>-->
+                    </label>
+                    <select class="form-select" name="algo" id="algo">
+                        <option value="Astar">Astar</option>
+                        <option value="Dijkstra">Dijkstra</option>
+                    </select><!--
+</div>-->
+<!--                    <div class="form-group pt-3">-->
+<!--                        <label>Maximum percent of shortest path to travel:</label>-->
+                        100%
+                        <input type="range" id="percent" min="100" max="200" step="25" list="steplist">
+                        <datalist id="steplist">
+                            <option>100</option>
+                            <option>125</option>
+                            <option>150</option>
+                            <option>175</option>
+                            <option>200</option>
+                        </datalist>
+                        200%
+                    <br/>
+<!--                    </div>-->
+                    <!-- Default switch -->
+
+<!--                    <span class="form-check form-switch">-->
+<!--&lt;!&ndash;                    <label class="form-check-label" for="flexSwitchCheckDefault">Min</label>&ndash;&gt;-->
+<!--                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">-->
+<!--                    <label class="form-check-label" for="flexSwitchCheckDefault">Max</label>-->
+<!--                    </span>-->
+<!--                    <label class="switch">-->
+<!--                        <input type="checkbox">-->
+<!--                        <span class="slider"></span>-->
+<!--                    </label>-->
+<!--                    <div class="custom-control custom-switch">-->
+<!--                    <input type="checkbox" class="custom-control-input" id="customSwitch1">-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <div class="form-group pt-3">&ndash;&gt;-->
+<!--                        <label class="custom-control-label" for="customSwitch1">Elevation Preference:</label>-->
+<!--                        <select class="form-select" name="elevation" id="elevation">-->
+<!--                            <option value="max">Maximum</option>-->
+<!--                            <option value="min">Minimum</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    </div>-->
+<!--                    <div class="form-group pt-3">-->
+
+<!--                    </div>-->
+                </form>
+                <div class="form-group pt-3 text-center">
+                    <button id="submit" onclick="submit()" class="btn btn-primary">Search</button>
+                    <button class="btn btn-danger" id="reset" onclick="reset()">Reset</button>
+                </div>
+            </div>
+            <div class="row border p-2" id="statistics" style="height: 192px;">
+
+            </div>
+<!--        </div>-->
+        <div class="col-lg-9">
+            <div id="map" class="border" style="height: 650px; width: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwgA49m7P_jYVRdLY2aS8uy7VIGYkpweE&libraries=places&callback=initAutocomplete"></script>
+
+</body>
+</body>
+</html>
