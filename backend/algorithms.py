@@ -11,11 +11,17 @@
 # def Dijkstras(source, destination, strategy, pathlimit):
 #     return "test"
 
+from collections import defaultdict
+import heapq
+
 """
 Graph Object -> list of nodes
                 -> Each node : latitude, longitude, distance from end node, elevation data 
 """
 """ A Star"""
+
+
+
 def __init__(self, go, strategy, pl):
     """
         go -> graph object
@@ -93,7 +99,58 @@ def inputVerifier(self): # verify if we have the source and destination properly
 def pathGeneration(self):
     return 'generatedpath' #to do
 
-#def dijkstra(self):
+
+
+#def reloadGraph (?)
+#def shortestPath()
+#def weights()
+
+def dijkstra(self):
+    """
+    endPos : position of end node in the heap
+    distCover : distance covered till reaching the end
+    """
+    if not self.inputVerifier():
+        return
+    # G, x, shortest, mode = self.G, self.x, self.shortest_dist, self.mode
+    #q, seen, mins = [(0.0, 0.0, start_node)], set(), {start_node: 0}
+    q = [(0.0, 0.0, self.start)] # heap implementation
+    visited = set()
+    hmap = {}
+    hmap[self.start] = 0
+    parent = defaultdict(int)
+    while q:
+        endPos, distCover, currNode = heapq.heappop(q)
+
+        if currNode not in visited:
+            visited.add(currNode)
+            if currNode == self.end:
+                return endPos, distCover, parent
+            
+            for n in self.go.neighbors(currNode):
+                if n in visited:
+                    continue
+                prev = hmap.get(n, None)
+                length = self.weights(currNode, n, 'normal')
+
+                if self.strategy == "maximize":
+                    next = length - self.weights(currNode, n, "elev-gain")
+                else:
+                    next = length - self.weights(currNode, n, "elev-drop")
+                #check the True/False flags
+                nextDistCover = distCover + length
+                if nextDistCover <= self.shortestDist * (1 + self.pl) and (prev == None or next < prev):
+                    parent[n] = currNode
+                    hmap[n] = nextDistCover
+                    heapq.heappush(q, (next, nextDistCover, n))
+    return None, None, None
+
+
+
+                
+
+
+
 
 
 
