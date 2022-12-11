@@ -125,30 +125,55 @@ function addMarkerOnMap(input, map, markers, bounds, key) {
       resetRouteStatistics();
       document.getElementById("dataForm").reset();
   }
+  
 
   function submit(){
-  print("inside submit")
-    if(!formValidation()){
-      return;
-    }
-    $.get("http://127.0.0.1:5000/"+ encodeURIComponent($("#start").val()) + ":" 
-    + encodeURIComponent($("#end").val()) + ":" 
-    + encodeURIComponent($("#percent").val()) + ":" 
-    + encodeURIComponent($("#elevation").val()) + ":" 
-    + encodeURIComponent($("#algo").val())).done(function (data) {
-      start = data.origin;
-      end = data.des
-      path = data.path;
-      distance = data.dis;
-      elevation = data.elev;
-       
-      for(var i =0; i < path.length; i++)
-      {
-        showPathOnMap(start, end, path[i], distance, elevation); 
+    // print("inside submit")
+    console.log("inside submit!!")
+    // if(!formValidation()){
+    //     return;
+    // }
+
+
+    $.ajax({
+      type: "POST",
+      url: "/test",
+      data: JSON.stringify({ 
+        start: document.getElementById("start").value,
+        end: document.getElementById("end").value,
+        algo: document.getElementById("algo").value,
+        percent: document.getElementById("percent").value,
+        elevationtype: document.getElementById("elevation").value
+      }),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      success: function(result) {
+        
+        console.log(result)
+      },
+      error: function(result) {
+          alert('Bad Request !!!');
       }
+  });
+    // $.get("http://127.0.0.1:5000/"+ encodeURIComponent($("#start").val()) + ":" 
+    // + encodeURIComponent($("#end").val()) + ":" 
+    // + encodeURIComponent($("#percent").val()) + ":" 
+    // + encodeURIComponent($("#elevation").val()) + ":" 
+    // + encodeURIComponent($("#algo").val())).done(function (data) {
+    //   start = data.origin;
+    //   end = data.des
+    //   path = data.path;
+    //   distance = data.dis;
+    //   elevation = data.elev;
       
-    })
-  }
+       
+    //   for(var i =0; i < path.length; i++)
+    //   {
+    //     showPathOnMap(start, end, path[i], distance, elevation); 
+    //   }
+      
+    // })
+ }
 
   function formValidation(){
     var start = document.getElementById("start").value;
