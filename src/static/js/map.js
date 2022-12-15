@@ -1,130 +1,126 @@
 var map;
 var markers;
+
 function initAutocomplete() {
-  directionsService = new google.maps.DirectionsService;
-  directionsDisplay = new google.maps.DirectionsRenderer({
+  service = new google.maps.DirectionsService;
+  renderer = new google.maps.DirectionsRenderer({
     polylineOptions: {
       strokeColor: "red"
     }
   });
-  markers = new Map();
+
   var bounds = new google.maps.LatLngBounds();
 
   map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 42.3732, lng: -72.5199 },
-    zoom: 13,
+    center: { lat: 42.3832, lng: -72.5299 },
+    zoom: 12,
     mapTypeId: "roadmap",
   });
 
-  directionsDisplay.setMap(map);
+  renderer.setMap(map);
 
-  // Create the search box and link it to the UI element.
   var source = document.getElementById("source");
   var dest = document.getElementById("dest");
-
-  addMarkerOnMap(source, map, markers, bounds, 'source');
-  addMarkerOnMap(dest, map, markers, bounds, 'dest');
+  markers = new Map();
+  addMarker(source, map, markers, bounds, 'source');
+  addMarker(dest, map, markers, bounds, 'dest');
 }
 
-function addMarkerOnMap(input, map, markers, bounds, key) {
+function addMarker(point, map, markers, bounds, key_val) {
 
-var autocomplete = new google.maps.places.Autocomplete(input);
-autocomplete.bindTo('bounds', map);
+    var auto = new google.maps.places.Autocomplete(point);
+    auto.bindTo('bounds', map);
 
-google.maps.event.addListener(autocomplete, 'place_changed', function () {
-  var place = autocomplete.getPlace();
+    google.maps.event.addListener(auto, 'place_changed', function () {
+      var place = auto.getPlace();
 
-  const icon = {
-    url: place.icon,
-    size: new google.maps.Size(71, 71),
-    origin: new google.maps.Point(0, 0),
-    anchor: new google.maps.Point(17, 34),
-    scaledSize: new google.maps.Size(25, 25),
-  };
+      const icon = {
+        url: place.icon,
+        size: new google.maps.Size(73, 73),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(24, 24),
+      };
 
-  var marker = new google.maps.Marker({
-      map,
-      icon,
-      title: place.name,
-      position: place.geometry.location,
+      var marker = new google.maps.Marker({
+        map,
+        icon,
+        title: place.name,
+        position: place.geometry.location,
+      });
+
+      var info = new google.maps.InfoWindow();
+      google.maps.event.addListener(marker, 'click', (function(marker) {
+        return function() {
+            info.setContent(place.name);
+            info.open(map, marker);
+        }
+      })(marker));
+
+      if(markers.has(key_val)) {
+        markers.get(key_val).setMap(null);
+        markers.delete(key_val);
+      }
+      markers.set(key_val, marker);
+      bounds.extend(marker.position);
+      map.fitBounds(bounds);
+
+      var zoom = map.getZoom();
+      map.setZoom(zoom > 12 ? 12 : zoom);
     });
-
-  var infowindow = new google.maps.InfoWindow();
-  google.maps.event.addListener(marker, 'click', (function(marker) {
-    return function() {
-      infowindow.setContent(place.name);
-      infowindow.open(map, marker);
-    }
-  })(marker));
-
-  // Create a marker for each place.
-  
-  if(markers.has(key)) {
-      //alert(markers.get(box));
-      markers.get(key).setMap(null);
-      markers.delete(key);
-  }  
-  markers.set(key, marker);
-  //alert(markers.get('a'));
-  //markers.set('a', marker)
-  bounds.extend(marker.position);
-  map.fitBounds(bounds);  
-  var zoom = map.getZoom();
-  map.setZoom(zoom > 13 ? 13 : zoom);
-  });
 }
 
 function removeMarker() {
   markers.get('source').setMap(null);
   markers.get('dest').setMap(null);
   markers.clear();
-  map.setCenter({lat:42.3732, lng:-72.5199});
-  map.setZoom(13);
-
-  directionsDisplay.setMap(map);
+  map.setCenter({ lat: 42.3832, lng: -72.5299 });
+  map.setZoom(12);
+  renderer.setMap(map);
 }
 
-function removePathFromMap(){
-  directionsDisplay.setDirections({routes: []});
-  directionsDisplay.setMap(null);
-  directionsDisplay.setPanel(null);
-  directionsService = new google.maps.DirectionsService;
-  directionsDisplay = new google.maps.DirectionsRenderer({
+function removePath() {
+  renderer.setDirections({routes: []});
+  renderer.setMap(null);
+  renderer.setPanel(null);
+  service = new google.maps.DirectionsService;
+  renderer = new google.maps.DirectionsRenderer({
     polylineOptions: {
       strokeColor: "red"
     }
   });
-  directionsDisplay.setMap(map);
+  renderer.setMap(map);
 }
 
 function reset() {
-    resetStatistics()
-    removeMarker();
-    removePathFromMap();
     document.getElementById("userForm").reset();
+    resetStatistics();
+    removeMarker();
+    removePath();
 }
 
-function showPathOnMap(source, dest, path, distance, elevation){
-  waypts = []
+function showPathOnMap(source, dest, path, distance, elevation) {
+  path_points = []
   for (let i = 3; i < path.length-3; i++){
-    waypts.push({
-      location: new google.maps.LatLng(path[i][0], path[i][1]),
+    var lat = path[i][0];
+    var long= path[i][1];
+    path_points.push({
+      location: new google.maps.LatLng(lat,long),
       stopover: false,
     });
   }
 
-  directionsService.route({
+  service.route({
     origin: new google.maps.LatLng(source[0], source[1]),
     destination: new google.maps.LatLng(dest[0], dest[1]),
-    waypoints: waypts,
-    // optimizeWaypoints: true,
+    waypoints: path_points,
     travelMode: 'WALKING'
   }, function(response, status) {
     if (status === 'OK') {
-      directionsDisplay.setDirections(response);
+      renderer.setDirections(response);
       setStatistics(distance, elevation);
     } else {
-      window.alert('Directions request failed due to ' + status);
+      window.alert('Request failed with error ' + status);
     }
   });
 
@@ -133,8 +129,8 @@ function showPathOnMap(source, dest, path, distance, elevation){
 
 function submit(){
     var best_path;
-    var validation=formValidation();
-    if(validation==true){
+    var validation = formValidation();
+    if(validation == true) {
           $.ajax({
             type: "POST",
             url: "/test",
@@ -149,34 +145,32 @@ function submit(){
             dataType: "json",
             success: function(result) {
               best_path = result['elevation_route']['geometry']['coordinates']
-              distance=result['shortDist']
+              distance = result['shortDist']
               gainShort = result['gainShort']
-              elevation=result['elenavDist']
-              elevationtype= document.getElementById("elevation").value
+              elevation = result['elenavDist']
+
               console.log(typeof best_path)
 
+              var len = best_path.length-1
+
               var source = best_path[0]
-              var dest = best_path[best_path.length-1]
-              if(elevationtype=='Minimum'){
-                var pointA = new google.maps.LatLng(source['0'], source['1']);
-                var pointB = new google.maps.LatLng(dest['0'], dest['1']);
-              }
-              if(elevationtype=='Maximum'){
-                var pointB = new google.maps.LatLng(source['0'], source['1']);
-                var pointA = new google.maps.LatLng(dest['0'], dest['1']);
-              }
-              console.log(source)
+              var dest = best_path[len]
 
-              const waypts = [];
+              var ptA = new google.maps.LatLng(source['0'], source['1']);
+              var ptB = new google.maps.LatLng(dest['0'], dest['1']);
 
-              for (let i = best_path.length-1; i >=0 ; i--) {
-                  waypts.push({
-                    location: new google.maps.LatLng(best_path[i]['0'], best_path[i]['1']),
+              const path_points = [];
+
+              for (let i = len; i >=0 ; i--) {
+                  var lat = best_path[i]['0']
+                  var long = best_path[i]['1']
+                  path_points.push({
+                    location: new google.maps.LatLng(lat, long),
                     stopover: false,
                   });
               }
 
-              initMap(pointA, pointB, waypts)
+              initMap(ptA, ptB, path_points)
               showPathOnMap(source, dest, best_path, distance, elevation);
 
             },
@@ -187,56 +181,48 @@ function submit(){
     }
 }
 
-// https://jsfiddle.net/u9no8te4/
-function initMap(pointA, pointB, waypts) {
-      var myOptions = {
-          zoom: 7,
-          center: pointA
-      },
-      // map = new google.maps.Map(document.getElementById('map-canvas'), myOptions),
-      // Instantiate a directions service.
-      directionsService = new google.maps.DirectionsService,
-      directionsDisplay = new google.maps.DirectionsRenderer({
-          map: map
-      });
+function initMap(ptA, ptB, path_points) {
+    var myOptions = {
+        zoom: 7,
+        center: ptA
+    },
+    // Instantiate a directions service.
+    service = new google.maps.DirectionsService,
+    renderer = new google.maps.DirectionsRenderer({
+        map: map
+    });
 
-  // get route from A to B
-  calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB, waypts);
-
+    // get route from A to B
+    displayRoute(service, renderer, ptA, ptB, path_points);
 }
 
-
-
-function calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB, waypts) {
-  directionsService.route({
-      origin: pointA,
-      destination: pointB,
-      waypoints: waypts,
+function displayRoute(service, renderer, ptA, ptB, path_points) {
+  service.route({
+      origin: ptA,
+      destination: ptB,
+      waypoints: path_points,
       travelMode: google.maps.TravelMode.WALKING
   }, function (response, status) {
       if (status == google.maps.DirectionsStatus.OK) {
-          directionsDisplay.setDirections(response);
+          renderer.setDirections(response);
       } else {
           window.alert('Directions request failed due to ' + status);
       }
   });
 }
 
-
-
-
 function formValidation(){
   var source = document.getElementById("source").value;
   var dest = document.getElementById("dest").value;
   var algo = document.getElementById("algo").value;
-  var elevationtype = document.getElementById("elevation").value;
+  var elevation_type = document.getElementById("elevation").value;
 
-  if(source == ""){
+  if(source == "") {
     window.alert("Source Location is required.");
     return false;
   }
 
-  if(dest == ""){
+  if(dest == "") {
     window.alert("Destination Location is required.");
     return false;
   }
@@ -246,7 +232,7 @@ function formValidation(){
     return false;
   }
 
-  if(elevationtype == "Select Elevation") {
+  if(elevation_type == "Select Elevation") {
       window.alert("Elevation is required.");
       return false;
   }
