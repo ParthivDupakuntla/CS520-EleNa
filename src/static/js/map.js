@@ -18,11 +18,11 @@ function initAutocomplete() {
   directionsDisplay.setMap(map);
 
   // Create the search box and link it to the UI element.
-  var start = document.getElementById("start");
-  var end = document.getElementById("end");
+  var source = document.getElementById("source");
+  var dest = document.getElementById("dest");
 
-  addMarkerOnMap(start, map, markers, bounds, 'start');
-  addMarkerOnMap(end, map, markers, bounds, 'end');
+  addMarkerOnMap(source, map, markers, bounds, 'source');
+  addMarkerOnMap(dest, map, markers, bounds, 'dest');
 }
 
 function addMarkerOnMap(input, map, markers, bounds, key) {
@@ -74,8 +74,8 @@ google.maps.event.addListener(autocomplete, 'place_changed', function () {
 }
 
 function removeMarker() {
-  markers.get('start').setMap(null);
-  markers.get('end').setMap(null);
+  markers.get('source').setMap(null);
+  markers.get('dest').setMap(null);
   markers.clear();
   map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 42.3732, lng: -72.5199 },
@@ -103,10 +103,10 @@ function reset() {
     resetRouteStatistics()
     removeMarker();
     removePathFromMap();
-    document.getElementById("dataForm").reset();
+    document.getElementById("userForm").reset();
 }
 
-function showPathOnMap(start, end, path, distance, elevation){
+function showPathOnMap(source, dest, path, distance, elevation){
   waypts = []
   for (let i = 3; i < path.length-3; i++){
     waypts.push({
@@ -116,8 +116,8 @@ function showPathOnMap(start, end, path, distance, elevation){
   }
 
   directionsService.route({
-    origin: new google.maps.LatLng(start[0], start[1]),
-    destination: new google.maps.LatLng(end[0], end[1]),
+    origin: new google.maps.LatLng(source[0], source[1]),
+    destination: new google.maps.LatLng(dest[0], dest[1]),
     waypoints: waypts,
     // optimizeWaypoints: true,
     travelMode: 'WALKING'
@@ -140,8 +140,8 @@ function submit(){
     type: "POST",
     url: "/test",
     data: JSON.stringify({ 
-      start: document.getElementById("start").value,
-      end: document.getElementById("end").value,
+      source: document.getElementById("source").value,
+      dest: document.getElementById("dest").value,
       algo: document.getElementById("algo").value,
       percent: document.getElementById("percent").value,
       elevationtype: document.getElementById("elevation").value
@@ -155,11 +155,11 @@ function submit(){
       elevation=result['elenavDist']
       console.log(typeof best_path)
 
-      var start = best_path[best_path.length-1]
-      var end = best_path[0]
-      var pointA = new google.maps.LatLng(start['0'], start['1']);
-      var pointB = new google.maps.LatLng(end['0'], end['1']);
-      console.log(start)
+      var source = best_path[best_path.length-1]
+      var dest = best_path[0]
+      var pointA = new google.maps.LatLng(source['0'], source['1']);
+      var pointB = new google.maps.LatLng(dest['0'], dest['1']);
+      console.log(source)
       
       const waypts = [];
     
@@ -171,7 +171,7 @@ function submit(){
       }
 
       initMap(pointA, pointB, waypts)
-      showPathOnMap(start, end, best_path, distance, elevation);
+      showPathOnMap(source, dest, best_path, distance, elevation);
       
     },
     error: function(result) {
@@ -241,16 +241,16 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, 
 
 
 function formValidation(){
-  var start = document.getElementById("start").value;
-  var end = document.getElementById("end").value;
+  var source = document.getElementById("source").value;
+  var dest = document.getElementById("dest").value;
 
-  if(start==""){
-    window.alert("Start Location is required.");
+  if(source == ""){
+    window.alert("Source Location is required.");
     return false;
   }
 
-  if(end==""){
-    window.alert("End Location is required.");
+  if(dest == ""){
+    window.alert("Destination Location is required.");
     return false;
   }
   return true;

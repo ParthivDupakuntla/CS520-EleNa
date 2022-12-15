@@ -78,8 +78,8 @@ def test():
     except:
         return "Bad Request"
     try:
-        source = data['start']
-        destination = data['end']
+        source = data['source']
+        destination = data['dest']
         pathlimit = float(data['percent'])
         algorithm = data['algo']
         elevationmode = data['elevationtype']
