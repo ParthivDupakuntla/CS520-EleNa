@@ -77,8 +77,12 @@ function removeMarker() {
   markers.get('start').setMap(null);
   markers.get('end').setMap(null);
   markers.clear();
-  map.setCenter({lat:42.3732, lng:-72.5199});
-  map.setZoom(13);
+  map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 42.3732, lng: -72.5199 },
+      zoom: 13,
+      mapTypeId: "roadmap",
+    });
+
   directionsDisplay.setMap(map);
 }
 
@@ -130,13 +134,7 @@ function showPathOnMap(start, end, path, distance, elevation){
 
 
 function submit(){
-  // print("inside submit")
-  console.log("inside submit!!")
-  // if(!formValidation()){
-  //     return;
-  // }
-
-  var best_path;
+    var best_path;
 
   $.ajax({
     type: "POST",
@@ -155,7 +153,6 @@ function submit(){
       distance=result['shortDist']
       gainShort = result['gainShort']
       elevation=result['elenavDist']
-      //console.log(best_path)
       console.log(typeof best_path)
 
       var start = best_path[best_path.length-1]
@@ -260,7 +257,7 @@ function formValidation(){
 }
 
 function setRouteStatistics(distance, elevation) {
-  var routeStats = "Total Distance: " + distance + "<br>Elevation Gain: " + elevation;
+  var routeStats = "<h1> Route Statistics </h1> <br> Total Distance: " + distance + "<br>Elevation Gain: " + elevation;
   document.getElementById("statistics").innerHTML = routeStats;
   document.getElementById("statistics").style["display"]='block';
   document.getElementById("map-row").classList.remove("col-lg-12");
