@@ -154,12 +154,19 @@ function submit(){
               distance=result['shortDist']
               gainShort = result['gainShort']
               elevation=result['elenavDist']
+              elevationtype= document.getElementById("elevation").value
               console.log(typeof best_path)
 
               var source = best_path[0]
               var dest = best_path[best_path.length-1]
-              var pointA = new google.maps.LatLng(source['0'], source['1']);
-              var pointB = new google.maps.LatLng(dest['0'], dest['1']);
+              if(elevationtype=='Minimum'){
+                var pointA = new google.maps.LatLng(source['0'], source['1']);
+                var pointB = new google.maps.LatLng(dest['0'], dest['1']);
+              }
+              if(elevationtype=='Maximum'){
+                var pointB = new google.maps.LatLng(source['0'], source['1']);
+                var pointA = new google.maps.LatLng(dest['0'], dest['1']);
+              }
               console.log(source)
 
               const waypts = [];
@@ -223,6 +230,8 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, 
 function formValidation(){
   var source = document.getElementById("source").value;
   var dest = document.getElementById("dest").value;
+  var algo = document.getElementById("algo").value;
+  var elevationtype = document.getElementById("elevation").value;
 
   if(source == ""){
     window.alert("Source Location is required.");
@@ -233,6 +242,17 @@ function formValidation(){
     window.alert("Destination Location is required.");
     return false;
   }
+
+  if(algo == "Select Algorithm") {
+    window.alert("Algorithm is required.");
+    return false;
+  }
+
+  if(elevationtype == "Select Elevation") {
+      window.alert("Elevation is required.");
+      return false;
+  }
+
   return true;
 }
 
