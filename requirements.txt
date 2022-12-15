@@ -1,0 +1,6 @@
+Flask==1.1.2
+googlemaps==4.7.3
+matplotlib==3.5.2
+networkx==2.8.4
+numpy==1.23.5
+osmnx==1.2.2

@@ -1,4 +1,5 @@
 var map;
+var markers;
 function initAutocomplete() {
   directionsService = new google.maps.DirectionsService;
   directionsDisplay = new google.maps.DirectionsRenderer({
@@ -77,11 +78,8 @@ function removeMarker() {
   markers.get('source').setMap(null);
   markers.get('dest').setMap(null);
   markers.clear();
-  map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 42.3732, lng: -72.5199 },
-      zoom: 13,
-      mapTypeId: "roadmap",
-    });
+  map.setCenter({lat:42.3732, lng:-72.5199});
+  map.setZoom(13);
 
   directionsDisplay.setMap(map);
 }
