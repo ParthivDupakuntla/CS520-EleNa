@@ -20,11 +20,6 @@ class Algorithms:
         self.best = [[], 0.0, float('-inf'), 0.0]
         self.start_node, self.end_node = None, None
 
-    def reload_graph(self, G):
-        """
-        Reinitialize current graph with "G"
-        """
-        self.G = G
 
     def verify_nodes(self):
         """
