@@ -100,7 +100,7 @@ function removePathFromMap(){
 }
 
 function reset() {
-    resetRouteStatistics()
+    resetStatistics()
     removeMarker();
     removePathFromMap();
     document.getElementById("userForm").reset();
@@ -124,7 +124,7 @@ function showPathOnMap(source, dest, path, distance, elevation){
   }, function(response, status) {
     if (status === 'OK') {
       directionsDisplay.setDirections(response);
-      setRouteStatistics(distance, elevation);
+      setStatistics(distance, elevation);
     } else {
       window.alert('Directions request failed due to ' + status);
     }
@@ -135,71 +135,51 @@ function showPathOnMap(source, dest, path, distance, elevation){
 
 function submit(){
     var best_path;
+    var validation=formValidation();
+    if(validation==true){
+          $.ajax({
+            type: "POST",
+            url: "/test",
+            data: JSON.stringify({
+              source: document.getElementById("source").value,
+              dest: document.getElementById("dest").value,
+              algo: document.getElementById("algo").value,
+              percent: document.getElementById("percent").value,
+              elevationtype: document.getElementById("elevation").value
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(result) {
+              best_path = result['elevation_route']['geometry']['coordinates']
+              distance=result['shortDist']
+              gainShort = result['gainShort']
+              elevation=result['elenavDist']
+              console.log(typeof best_path)
 
-  $.ajax({
-    type: "POST",
-    url: "/test",
-    data: JSON.stringify({ 
-      source: document.getElementById("source").value,
-      dest: document.getElementById("dest").value,
-      algo: document.getElementById("algo").value,
-      percent: document.getElementById("percent").value,
-      elevationtype: document.getElementById("elevation").value
-    }),
-    contentType: "application/json; charset=utf-8",
-    dataType: "json",
-    success: function(result) {
-      best_path = result['elevation_route']['geometry']['coordinates']
-      distance=result['shortDist']
-      gainShort = result['gainShort']
-      elevation=result['elenavDist']
-      console.log(typeof best_path)
+              var source = best_path[0]
+              var dest = best_path[best_path.length-1]
+              var pointA = new google.maps.LatLng(source['0'], source['1']);
+              var pointB = new google.maps.LatLng(dest['0'], dest['1']);
+              console.log(source)
 
-      var source = best_path[best_path.length-1]
-      var dest = best_path[0]
-      var pointA = new google.maps.LatLng(source['0'], source['1']);
-      var pointB = new google.maps.LatLng(dest['0'], dest['1']);
-      console.log(source)
-      
-      const waypts = [];
-    
-      for (let i = best_path.length-1; i >=0 ; i--) {
-          waypts.push({
-            location: new google.maps.LatLng(best_path[i]['0'], best_path[i]['1']),
-            stopover: false,
-          });
-      }
+              const waypts = [];
 
-      initMap(pointA, pointB, waypts)
-      showPathOnMap(source, dest, best_path, distance, elevation);
-      
-    },
-    error: function(result) {
-        alert('Bad Request !!!');
+              for (let i = best_path.length-1; i >=0 ; i--) {
+                  waypts.push({
+                    location: new google.maps.LatLng(best_path[i]['0'], best_path[i]['1']),
+                    stopover: false,
+                  });
+              }
+
+              initMap(pointA, pointB, waypts)
+              showPathOnMap(source, dest, best_path, distance, elevation);
+
+            },
+            error: function(result) {
+                alert('Bad Request !!!');
+            }
+        });
     }
-});
-
-
-
-
-  // $.get("http://127.0.0.1:5000/"+ encodeURIComponent($("#start").val()) + ":" 
-  // + encodeURIComponent($("#end").val()) + ":" 
-  // + encodeURIComponent($("#percent").val()) + ":" 
-  // + encodeURIComponent($("#elevation").val()) + ":" 
-  // + encodeURIComponent($("#algo").val())).done(function (data) {
-  //   start = data.origin;
-  //   end = data.des
-  //   path = data.path;
-  //   distance = data.dis;
-  //   elevation = data.elev;
-    
-     
-  //   for(var i =0; i < path.length; i++)
-  //   {
-  //     showPathOnMap(start, end, path[i], distance, elevation); 
-  //   }
-    
-  // })
 }
 
 // https://jsfiddle.net/u9no8te4/
@@ -256,17 +236,17 @@ function formValidation(){
   return true;
 }
 
-function setRouteStatistics(distance, elevation) {
-  var routeStats = "<h1> Route Statistics </h1> <br> Total Distance: " + distance + "<br>Elevation Gain: " + elevation;
+function setStatistics(distance, elevation) {
+  var routeStats = "<h1> Route Statistics </h1> <br> Total Distance: " + distance + " m<br><br>Elevation Gain: " + elevation +" m";
   document.getElementById("statistics").innerHTML = routeStats;
   document.getElementById("statistics").style["display"]='block';
   document.getElementById("map-row").classList.remove("col-lg-12");
   document.getElementById("map-row").classList.add("col-lg-9");
 }
 
-function resetRouteStatistics() {
+function resetStatistics() {
   document.getElementById("statistics").innerHTML = "";
   document.getElementById("statistics").style["display"]='none'
   document.getElementById("map-row").classList.remove("col-lg-9");
-    document.getElementById("map-row").classList.add("col-lg-12");
+  document.getElementById("map-row").classList.add("col-lg-12");
 }
