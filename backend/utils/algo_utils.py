@@ -75,3 +75,6 @@ def pathRebuild(G, fromDict, current):
     bestPath = [total_path[:], getElevation(G, total_path, "vanilla"), 
                 getElevation(G, total_path, "gain"), getElevation(G, total_path, "drop")]
     return bestPath
+
+def reInit(G): #For testing
+    G = G
