@@ -49,7 +49,7 @@ def findRoute():
                                 mode = elevationmode, 
                                 log=True)
     except:
-        return "Bad Request"
+        return make_response("Unable to run algorithms", 400)
     try:
         data = {"elevation_route" : elevPath[0], 
                 "shortest_route" : shortestPath[0],
@@ -62,4 +62,4 @@ def findRoute():
                 }
         return data
     except:
-        return "Bad Request"
+        return make_response("Unable to get route", 400)
