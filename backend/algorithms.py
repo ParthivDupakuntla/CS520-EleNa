@@ -37,8 +37,6 @@ class Algorithms:
         else : 
             self.bestPath = [[], 0.0, float('inf'), float('-inf')]
 
-        
-        
         self.startNode, d1 = ox.distance.nearest_nodes(G, start_location[1], start_location[0], return_dist=True)
         self.endNode, d2 = ox.distance.nearest_nodes(G, end_location[1], end_location[0], return_dist=True)
         if d1 > 100 or d2 > 100:
