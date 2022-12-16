@@ -5,24 +5,6 @@ import pickle as p
 import os
 
 
-def distance_between_locs(lat1,lon1,lat2,lon2):
-    R=6371008.8 #radius of the earth
-    
-    lat1 = np.radians(lat1)
-    lon1 = np.radians(lon1)
-    lat2 = np.radians(lat2)
-    lon2 = np.radians(lon2)
-
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-
-    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
-    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
-
-    distance = R * c
-    return distance
-
-
 class Model:
     def __init__(self):
         print("Model Initialized")        
@@ -34,6 +16,20 @@ class Model:
         else:
             self.init = False
 
+    
+    def calculate_spherical_distance(self, lat1, lon1, lat2, lon2, r=6371008.8):
+        # Convert degrees to radians
+        coordinates = lat1, lon1, lat2, lon2
+        # radians(c) is same as c*pi/180
+        phi1, lambda1, phi2, lambda2 = [
+            np.radians(c) for c in coordinates
+        ]
+        # Apply the haversine formula
+        a = (np.square(np.sin((phi2-phi1)/2)) + np.cos(phi1) * np.cos(phi2) * 
+            np.square(np.sin((lambda2-lambda1)/2)))
+        d = 2*r*np.arcsin(np.sqrt(a))
+        return d
+
     def addDistFromDest(self,G,end_location):
         print(end_location)
         nn = ox.distance.nearest_nodes(G, end_location[1], end_location[0], return_dist=False)
@@ -43,13 +39,10 @@ class Model:
         lat1=end_node['y']
         lon1=end_node['x']
         for node,data in G.nodes(data=True):
-
             lat2=G.nodes[node]['y']
             lon2=G.nodes[node]['x']
-            
-            distance = distance_between_locs(lat1,lon1,lat2,lon2)
             #print("-----------------", node,data,lat1,lon1,lat2,lon2,distance)        
-            data['distFromDest'] = distance
+            data['distFromDest'] = self.calculate_spherical_distance(lat1,lon1,lat2,lon2)
         return G
 
     def get_graph(self, start_location, end_location):
