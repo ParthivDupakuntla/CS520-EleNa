@@ -68,7 +68,7 @@
     <div class="row navbar-expand-lg navbar-dark bg-dark shadow-sm p-1">
         <center>
             <a href="#" class="navbar-brand">
-                <span class="font-weight-bold">EleNa: Elevation-based Navigation Application</span>
+                <span class="font-weight-bold">EleNa: Elevation-based Navigation</span>
             </a>
         </center>
     </div>
@@ -86,7 +86,7 @@
 
                 <div class="col-lg-2 ">
                     <select class="form-select" name="algo" id="algo">
-                        <option> Select Algorithm</option>
+                        <!--<option> Select Algorithm</option>-->
                         <option value="astar">Astar</option>
                         <option value="dijkstra">Dijkstra</option>
                     </select>
@@ -94,19 +94,25 @@
 
                 <div class="col-lg-3">
                         100%
-                        <input type="range" id="percent" min="100" max="200" step="25" list="steplist">
+                        <input type="range" id="percent" min="100" max="200" step="10" list="steplist">
                         <datalist id="steplist">
                             <option>100</option>
-                            <option>125</option>
+                            <option>110</option>
+                            <option>120</option>
+                            <option>130</option>
+                            <option>140</option>
                             <option>150</option>
-                            <option>175</option>
+                            <option>160</option>
+                            <option>170</option>
+                            <option>180</option>
+                            <option>190</option>
                             <option>200</option>
                         </datalist>
                         200%
                 </div>
                 <div class="col-lg-2 ">
                     <select class="form-select" name="elevation" id="elevation">
-                            <option> Select Elevation</option>
+                            <!--<option> Select Elevation</option>-->
                             <option value="minimize">Minimum</option>
                             <option value="maximize">Maximum</option>
                     </select>

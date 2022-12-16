@@ -34,7 +34,7 @@ class Model:
         else:
             self.init = False
 
-    def add_dist_from_dest(self,G,end_location):
+    def addDistFromDest(self,G,end_location):
         print(end_location)
         nn = ox.distance.nearest_nodes(G, end_location[1], end_location[0], return_dist=False)
         end_node=G.nodes[nn]
@@ -49,7 +49,7 @@ class Model:
             
             distance = distance_between_locs(lat1,lon1,lat2,lon2)
             #print("-----------------", node,data,lat1,lon1,lat2,lon2,distance)        
-            data['dist_from_dest'] = distance
+            data['distFromDest'] = distance
         return G
 
     def get_graph(self, start_location, end_location):
@@ -63,5 +63,5 @@ class Model:
             p.dump(self.G, open("graph.p", "wb" ) )
             self.init = True
             print("Saved Graph")
-        self.G = self.add_dist_from_dest(self. G,end_location)
+        self.G = self.addDistFromDest(self. G,end_location)
         return self.G
