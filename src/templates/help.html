@@ -20,6 +20,7 @@
         .about{
         padding:2rem;
         margin:3rem;
+        background-color: lightgray;
         }
 
 </style>
@@ -34,19 +35,31 @@
         </center>
     </div>
 
-<div id="about">
-    Current routing systems’ shortest path is not necessarily the shortest path with elevation gain considered.
-    The goal of this project is to design a navigation system that takes the elevation gain of a route into account.
-    We consider two features of elevation gain - maximum elevation gain and minimum elevation gain.<br/><br>
-    <h3> Fields Description:</h3>
-    <ul>
-        <li> <b>Source</b>: Enter the starting location </li>
-        <li> <b>Destination</b>: Enter the ending location </li>
-        <li> <b>Algorithm</b>: Select Algorithm from the drop-down menu for calculating the route. Currently supported algorithms are A star and Dijkstra.</li>
-        <li> <b>Percentage of elevation gain</b>: It limits the resultant route to x% of the shortest path</li>
-        <li> <b> </b></li>
-    </ul>
-</div>
+    <div class="about" id="about">
+        Current routing systems’ shortest path is not necessarily the shortest path with elevation gain considered.
+        The goal of this project is to design a navigation system that takes the elevation gain of a route into account.
+        We consider two features of elevation gain - maximum elevation gain and minimum elevation gain. The software is
+        written in Python and HTML, CSS where Python Flask App server was used to generate the route. <br/><br>
+        <h3> Fields Description:</h3>
+        <ul>
+            <li> <b>Source</b>: User can enter the starting location </li>
+            <li> <b>Destination</b>: User can enter the ending location </li>
+            <li> <b>Algorithm</b>: Select Algorithm from the drop-down menu for calculating the route. Currently supported algorithms are A star and Dijkstra.</li>
+            <li> <b>Percentage of elevation gain</b>: It limits the resultant route to x% of the shortest path</li>
+            <li> <b>Strategy of elevation gain</b>: It lets the user choose to see the route with minimum or maximum elevation gain.</li>
+        </ul>
+
+        <h3> Steps to Run the Software:</h3>
+        <ul>
+            <li> Enter the source. </li>
+            <li> Enter the destination. </li>
+            <li> Select Algorithm from the drop-down menu for calculating the route.</li>
+            <li> Set the percentage of elevation gain using the slider</li>
+            <li> Select whether you want minimum or maximum elevation gain.</li>
+            <li>Click of search</li>
+            <li> You will be able to see the route in red which should be followed according to the values entered in the fields.</li>
+        </ul>
+    </div>
 </div>
 
 </body>
