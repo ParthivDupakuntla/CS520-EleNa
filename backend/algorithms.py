@@ -1,337 +1,238 @@
 import osmnx as ox
 import networkx as nx
 from heapq import *
-import matplotlib.pyplot as plt
-from collections import deque, defaultdict
+import collections
 import numpy as np
 
+# Algorithms class consists of two algorithms - Astar and Dijkstra's and necessary helper functions to calculate the shortest route w.r.t elevation.
 class Algorithms:
-    def __init__(self, G, x = 0.0, mode = "maximize"):
+    def __init__(self, G, pl, mode = "maximize"):
         """
-        Initialize the class
-        Params:
-        G : Graph object
-        x : percent over shortest distance
-        mode : "maximize" or "minimize" elevation
+        Parameters : 
+        G -> Graph Object
+        mode -> chosen mode of elevation
+        pl -> Path Limit
+        startNode, endNode -> source, destination
+        bestPath -> best path returned
         """
+      
         self.G = G
         self.mode = mode
-        self.x = x
-        self.best = [[], 0.0, float('-inf'), 0.0]
-        self.start_node, self.end_node = None, None
+        self.pl = pl
+        self.bestPath = [[], 0.0, float('-inf'), 0.0]
+        self.startNode, self.endNode = None, None
 
-
-    def verify_nodes(self):
-        """
-        Verify if the start/end nodes are None
-        """
-        if self.start_node is None or self.end_node is None:
-            return False
-        return True
-
-    def reconstruct_path(self, cameFrom, current):
-        """
-        Function to retrace the path from end node to start node. Returns in the format required by Mapbox API(for plotting)
-        """
-        if not cameFrom or not current : return
-        total_path = [current]
-        while current in cameFrom:
-            current = cameFrom[current]
-            total_path.append(current)
-        self.best = [total_path[:], self.computeElevs(total_path, "normal"), self.computeElevs(total_path, "gain-only"), \
-                                                                        self.computeElevs(total_path, "drop-only")]
-        return
-
-    def a_star(self):
-        """
-        Returns the route(list of nodes) that minimize change in elevation between start and end using the A* node, with the heuristic 
-        being the distance from the end node. 
-        Params:
-            start_node: source node id
-            end_node: target node id
-            Returns:
-            lat_longs: List of [lon,lat] in the route
-        """
-        
-        if not self.verify_nodes() : return
-        G, shortest = self.G, self.shortest_dist
-        x, mode = self.x, self.mode
-        start_node, end_node = self.start_node, self.end_node
-        
-        #The settotal_path of nodes already evaluated
-        closedSet = set()
-        # The set of currently discovered nodes that are not evaluated yet.
-        # Initially, only the start node is known.        
-        openSet = set()
-        openSet.add(start_node)
-        # For each node, which node it can most efficiently be reached from.
-        # If a node can be reached from many nodes, cameFrom will eventually contain the
-        # most efficient previous step.
-        cameFrom = {}
-        #For each node, the cost of getting from the start node to that node.
-        gScore = {}
-        for node in G.nodes():
-            gScore[node] = float("inf")
-        #The cost of going from start to start is zero.
-        gScore[start_node] = 0 
-
-        gScore1 = {}
-        for node in G.nodes():
-            gScore1[node] = float("inf")
-        #The cost of going from start to start is zero.
-        gScore1[start_node] = 0
-        # For each node, the total cost of getting from the start node to the goal
-        # by passing by that node. That value is partly known, partly heuristic.
-        fScore = {}
-
-        # For the first node, that value is completely heuristic.
-        fScore[start_node] = G.nodes[start_node]['dist_from_dest']
-        
-        while len(openSet):
-            current = min([(node,fScore[node]) for node in openSet], key=lambda t: t[1])[0]            
-            if current == end_node:
-                self.reconstruct_path(cameFrom, current)
-                return
-            
-            openSet.remove(current)
-            closedSet.add(current)
-            for nei in G.neighbors(current):
-                if nei in closedSet:
-                    continue # Ignore the neighbor which is already evaluated.
-                #The distance from start to a neighbor
-                tentative_gScore = gScore[current] + self.getCost(current, nei, "gain-only")
-                tentative_gScore1 = gScore1[current] + self.getCost(current, nei, "normal")                
-                if nei not in openSet and tentative_gScore1<=(1+x)*shortest:# Discover a new node
-                    openSet.add(nei)
-                else:
-                    if tentative_gScore >= gScore[nei] or tentative_gScore1>=(1+x)*shortest:#Stop searching along this path if distance exceed 1.5 times shortest path
-                        continue # This is not a better path.                
-                cameFrom[nei] = current
-                gScore[nei] = tentative_gScore
-                gScore1[nei] = tentative_gScore1
-                fScore[nei] = gScore[nei] + G.nodes[nei]['dist_from_dest']
-        
-
-
-    def getCost(self, n1, n2, mode = "normal"):
-        """
-        Different cost metrics between two nodes
-        Params:
-        n1 : node 1
-        n2 : node 2
-        mode : type of cost that we want
-        Returns:
-        Chosen cost between nodes n1 and n2
-        """
+#Helper Functions : getCost, getElevation, getRoute, pathRebuild
+    def getCost(self, n1, n2, mode = "vanilla"):
+        """ defines the cost between two nodes """
         G = self.G
         if n1 is None or n2 is None : return
-        if mode == "gain-only":
+        if mode == "gain":
             return max(0.0, G.nodes[n2]["elevation"] - G.nodes[n1]["elevation"])
-        elif mode == "drop-only":
+        elif mode == "drop":
             if G.nodes[n2]["elevation"] - G.nodes[n1]["elevation"] > 0:
                 return 0.0
             else:
                 return G.nodes[n1]["elevation"] - G.nodes[n2]["elevation"]
-        # if mode == "normal":
-        #     try : return G.edges[n1, n2 ,0]["length"]
-        #     except : return G.edges[n1, n2]["weight"]
-        # elif mode == "elevation-diff":
-        #     return G.nodes[n2]["elevation"] - G.nodes[n1]["elevation"]
-        # elif mode == "gain-only":
-        #     return max(0.0, G.nodes[n2]["elevation"] - G.nodes[n1]["elevation"])
-        # elif mode == "drop-only":
-        #     return max(0.0, G.nodes[n1]["elevation"] - G.nodes[n2]["elevation"])
+        
         else:
             return abs(G.nodes[n1]["elevation"] - G.nodes[n2]["elevation"])
-
-    def computeElevs(self, route, mode = "both", piecewise = False):
-        """
-        Given a list of node id's, compute the "cost" for that route
-        Params:
-        route : list of node ids
-        mode : the cost metric that we want to aggregate (eg. distance between the nodes)
-        piecewise : boolean variable to indicate if the piecewise cost between the nodes should be returned
+    
+    
+    def getElevation(self, route, mode, pairFlag = False):
+        """ Computes the cost of a route which is the elevation of the route.
+        Parameters:
+            route -> List of Node IDs
+            mode -> mode of elevation 
+            pairFlag -> boolean to indicate if individual cost between the nodes needs to be returned
         Returns:
-        Total cost for route, Optional(Piecewise cost for route)
+            total -> total cost of the route
+            pairElevList -> list of individual costs of the route [Optional]
         """
         total = 0
-        if piecewise : piecewiseElevs = []
+        if pairFlag : pairElevList = []
         for i in range(len(route)-1):
-            if mode == "both":
-                diff = self.getCost(route[i],route[i+1],"elevation-diff")	
-            elif mode == "gain-only":
-                diff = self.getCost(route[i],route[i+1],"gain-only")
-            elif mode == "drop-only":
-                diff = self.getCost(route[i],route[i+1],"drop-only")
-            elif mode == "normal":
-                diff = self.getCost(route[i],route[i+1],"normal")
+            if mode == "gain":
+                diff = self.getCost(route[i],route[i+1],"gain")
+            elif mode == "vanilla":
+                diff = self.getCost(route[i],route[i+1],"vanilla")
+            else:
+                diff = self.getCost(route[i],route[i+1],"drop")
             total += diff
-            if piecewise : piecewiseElevs.append(diff)
-        if piecewise:
-            return total, piecewiseElevs
+            if pairFlag : pairElevList.append(diff)
+        if pairFlag:
+            return total, pairElevList
         else:
             return total
 
-    def getRoute(self, parent, dest):
-        "returns the path given a parent mapping and the final dest"
-        path = [dest]
-        curr = parent[dest]
-        while curr!=-1:
-            path.append(curr)
-            curr = parent[curr]
-        return path[::-1]
+    def getRoute(self, parentDict, dest):
+        """ The final path between a parent and destination is returned
+        Parameters : 
+            parentDict -> given parent mapping
+            dest -> final destination node
+        Returns :
+            res -> path from parent to dest
+        """
+        res = [dest]
+        current = parentDict[dest]
+        while current!=-1:
+            res.append(current)
+            current = parentDict[current]
+        return res[::-1]
 
-    def dijkstra(self, weight):
+
+    def pathRebuild(self, fromDict, current):
+        """ Reconstructs the path from dictionary of nodes
+        Parameters : 
+            fromDict -> dict containing best prvs node for the current node
+            current -> current node
         """
-        Finds the path that maximizes/minimizes absolute change in elevation between start and end nodes based on a heap impl.
-        Params:
-            weight : A list of two items. Defines how we wish to mark the cost between two nodes. 
-        Returns:
-            currPriority, currDist, parent
-            currPriority : priority of the target node in the heap
-            currDist : total distance covered in the process of reaching the target node
-            parent : a dictionary mapping between children and their parent. Useful for reconstructing the path from the target node.
+        if not fromDict or not current : return
+        total_path = [current]
+        while current in fromDict:
+            current = fromDict[current]
+            total_path.append(current)
+        self.bestPath = [total_path[:], self.getElevation(total_path, "vanilla"), self.getElevation(total_path, "gain"), self.getElevation(total_path, "drop")]
+        return
+
+#A STAR ALGORITHM
+    def a_star(self):
+        """ Returns a list of nodes that minimize/maximize change in elevation between start and destination using the A* Algorithm [ F(x) = G(x) + H(x)]
+        Heuristic used -> distance from end node (H(x))
+        Parameters : 
+            startNode, endNode -> source and destination node IDs
+            G -> graph object
+            mode -> mode of elevation
+        Returns :
+            List of latitude and longitude pairs of all the nodes in that route
         """
-        if not self.verify_nodes() : return
-        G, x, shortest, mode = self.G, self.x, self.shortest_dist, self.mode
-        start_node, end_node = self.start_node, self.end_node
-        q, seen, mins = [(0.0, 0.0, start_node)], set(), {start_node: 0}
+        G, shortest = self.G, self.shortestDist
+        pl, mode = self.pl, self.mode
+        startNode, endNode = self.startNode, self.endNode
+        if startNode is None or endNode is None:
+            return
+        closedList = []
+        openList = []
+        openList.append(startNode)
+        fromDict = {} #dict containing best prvs node for the current node
+        gScore = {}
+        for node in G.nodes():
+            gScore[node] = float("inf")
+        gScore[startNode] = 0 
+        gScorePl = {} # to consider path limit
+        for node in G.nodes():
+            gScorePl[node] = float("inf")
+        gScorePl[startNode] = 0
+        fScore = {} # To consider both weights and  heuristics. f(x) = g(x) + h(x)
+        fScore[startNode] = G.nodes[startNode]['distFromDest'] # g(x) = 0 
         
-        parent = defaultdict(int)
-        parent[start_node] = -1
+        while len(openList):
+            current = min([(node,fScore[node]) for node in openList], key=lambda t: t[1])[0]            
+            if current == endNode:
+                self.pathRebuild(fromDict, current)
+                return
+            openList.remove(current)
+            closedList.append(current)
+            for nei in G.neighbors(current):
+                if nei in closedList:
+                    continue 
+                tempgScore = gScore[current] + self.getCost(current, nei, "gain")
+                tempgScorePl = gScorePl[current] + self.getCost(current, nei, "vanilla")                
+                if nei not in openList and tempgScorePl <= (1 + pl) * shortest:
+                    openList.append(nei)
+                else:
+                    if tempgScore >= gScore[nei] or tempgScorePl >= ( 1 + pl) * shortest:#Stop searching along this path if distance exceed 2 times shortest path
+                        continue                 
+                fromDict[nei] = current
+                gScore[nei] = tempgScore
+                gScorePl[nei] = tempgScorePl
+                fScore[nei] = gScore[nei] + G.nodes[nei]['distFromDest']
+
+# DIJKSTRA's ALGORITHM
+    def dijkstra(self):
+        """ Similar functionality like A* function but implements Dijkstra's
+        Returns :
+            currPriority -> priority of destination node in the heap
+            currDist -> Distance calculated from start to end node yet
+            parentDict -> Dictionary that maps a node to it's previous child
+        """
+        G, pl, shortest, mode = self.G, self.pl, self.shortestDist, self.mode
+        startNode, endNode = self.startNode, self.endNode
+        if startNode is None or endNode is None:
+            return
+        q, visited, minDict = [(0.0, 0.0, startNode)], set(), {startNode: 0}
+        
+        parentDict = collections.defaultdict(int)
+        parentDict[startNode] = -1
         while q:
             currPriority, currDist, node = heappop(q)
             
-            if node not in seen:
-                seen.add(node)
-                if node == end_node:
-                    return currPriority, currDist, parent
+            if node not in visited:
+                visited.add(node)
+                if node == endNode:
+                    return currPriority, currDist, parentDict
 
                 for nei in G.neighbors(node):
-                    if nei in seen: continue
-                    prev = mins.get(nei, None)
-                    length = self.getCost(node, nei, "normal")
+                    if nei in visited: continue
+                    prev = minDict.get(nei, None)
+                    length = self.getCost(node, nei, "vanilla")
                     if mode == "maximize":
-                        next = length - self.getCost(node, nei, "gain-only")
+                        next = length - self.getCost(node, nei, "gain")
                     else:
-                        next = length - self.getCost(node, nei, "drop-only")
-                    # if mode == "maximize":
-                    #     if weight[0] == 1:
-                    #         next = length - self.getCost(node, nei, "elevation-diff")
-                    #     elif weight[0] == 2:
-                    #         next = (length - self.getCost(node, nei, "elevation-diff"))*length
-                    #     elif weight[0] == 3:
-                    #         next = length + self.getCost(node, nei, "drop-
-                    # only")
-                    # else:
-                    #     if weight[0] == 1:
-                    #         next = length + self.getCost(node, nei, "elevation-diff")
-                    #     elif weight[0] == 2:
-                    #         next = (length + self.getCost(node, nei, "elevation-diff"))*length 
-                    #     else: 
-                    #         next = length + self.getCost(node, nei, "gain-only")
-                    if weight[1] : next += currPriority
+                        next = length - self.getCost(node, nei, "drop")
+                    
+                    next += currPriority
                     nextDist = currDist + length
-                    if nextDist <= shortest*(1.0+x) and (prev is None or next < prev):
-                        parent[nei] = node
-                        mins[nei] = next
+                    if nextDist <= shortest*(1.0+pl) and (prev is None or next < prev):
+                        parentDict[nei] = node
+                        minDict[nei] = next
                         heappush(q, (next, nextDist, nei))        
         
         return None, None, None
 
-    def all_dijkstra(self):
-        """
-        Iteratively try out different weighting criterion for Dijkstra.
-        Choose the one that returns the best result and store that in self.best
-        """
-        if not self.verify_nodes() : return
-        start_node, end_node = self.start_node, self.end_node
-        
-            
-        for weight in [[1, True], [2, True], [3, True], [1, False], [2, False], [3, False]]:
-            _, currDist, parent = self.dijkstra(weight)
-            
-            if not currDist : continue
-            
-            route = self.getRoute(parent, end_node)
-            elevDist, dropDist = self.computeElevs(route, "gain-only"), self.computeElevs(route, "drop-only")            
-            if self.mode == "maximize":
-                if (elevDist > self.best[2]) or (elevDist == self.best[2] and currDist < self.best[1]):
-                    self.best = [route[:], currDist, elevDist, dropDist]
-            else:
-                if (elevDist < self.best[2]) or (elevDist == self.best[2] and currDist < self.best[1]):
-                    self.best = [route[:], currDist,  elevDist, dropDist]
-        #print("all_dijkstra :: ", self.best)
-        return
+    def returnDijkstra(self):
+        """ Returns the best path to self.bestPath after running Dijkstra's"""
+        startNode, endNode = self.startNode, self.endNode
+        if startNode is None or endNode is None:
+            return
+        temp, currDist, parentDict = self.dijkstra()
+        route = self.getRoute(parentDict, endNode)
+        elevDist, dropDist = self.getElevation(route, "gain"), self.getElevation(route, "drop")            
+        if self.mode == "maximize":
+            if (elevDist > self.bestPath[2]) or (elevDist == self.bestPath[2] and currDist < self.bestPath[1]):
+                self.bestPath = [route[:], currDist, elevDist, dropDist]
+        else:
+            if (elevDist < self.bestPath[2]) or (elevDist == self.bestPath[2] and currDist < self.bestPath[1]):
+                self.bestPath = [route[:], currDist,  elevDist, dropDist]
+        return 
 
-
-    def shortest_path(self, start_location, end_location, x, algo = "dijkstra", mode = "maximize", log = True):
-        """
-        Function to calculate the shortest path between the start_location and end_location.
-        Params:
-        start_location : tuple (lat, lng)
-        end_location : tuple (lat, lng)
-        x : how much more can we go above the shortest distance
-        algo : the algorithm to use for finding the specific path (astar/dijkstra)
-        mode : minimize/maximize elevation
-        log : log the results as the function runs
-        Returns:
-        L1, L2
-        both list contain four items : [best route found, 
-                                        total distance between the start and ending nodes of the best route, 
-                                        total positive change in elevation,
-                                        total negative change in elevation ]
-        L1 returns the statistics for the shortest path while L2 returns the statistics for the path considering elevation
-        If we are going from node "1" to node "2" : 
-        total positive change in elevation : (max(0, elev("2") - elev("1"))
-        total negative change in elevation : (max(0, elev("1") - elev("2"))
-        If the start_location, end_location are outside the defined graph, L1 and L2 will be None.
-        L2 will be None incase no route is found by our custom algorithms.
-        """
+#FINAL SHORTEST PATH 
+    def shortest_path(self, start_location, end_location, pl, algo = "dijkstra", mode = "maximize", log = True):
+        """ Returns the final shortest path route and its corresponding statistics"""
         G = self.G
-        self.x = x/100.0
+        self.pl = pl/100.0
         self.mode = mode
-        self.start_node, self.end_node = None, None
-                    #[path, totalDist, totalElevGain, totalElevDrop]
-        if mode == "maximize" : self.best = [[], 0.0, float('-inf'), float('-inf')]
-        else : self.best = [[], 0.0, float('inf'), float('-inf')]
-        #get shortest path
-        #print("shortest_path 1 :: ", algo)
-        self.start_node, d1 = ox.distance.nearest_nodes(G, start_location[1], start_location[0], return_dist=True)
-        self.end_node, d2 = ox.distance.nearest_nodes(G, end_location[1], end_location[0], return_dist=True)
-        #print("shortest_path 2 :: ",start_location,d1,d2)
-
+        self.startNode, self.endNode = None, None
+        if mode == "maximize" : self.bestPath = [[], 0.0, float('-inf'), float('-inf')]
+        else : self.bestPath = [[], 0.0, float('inf'), float('-inf')]
+        self.startNode, d1 = ox.distance.nearest_nodes(G, start_location[1], start_location[0], return_dist=True)
+        self.endNode, d2 = ox.distance.nearest_nodes(G, end_location[1], end_location[0], return_dist=True)
         if d1 > 100 or d2 > 100:
-            if log : print("Nodes too far")
+            if log : print("Nodes are too far away")
             return None, None
-
-        #print("shortest_path 3 :: ", self.start_node, self.end_node,  d1, d2)
-
-        self.shortest_route = ox.distance.shortest_path(G, orig=self.start_node, dest=self.end_node)
-        #print("shortest_path 4 :: ", self.shortest_route)
-        self.shortest_dist  = sum(ox.utils_graph.get_route_edge_attributes(G, self.shortest_route, 'length'))
-        #print("shortest_path 5 :: ", self.shortest_dist)
-                 
-        
+        self.shortestRoute = ox.distance.shortest_path(G, orig=self.startNode, dest=self.endNode)
+        self.shortestDist  = sum(ox.utils_graph.get_route_edge_attributes(G, self.shortestRoute, 'length'))
         if algo == "astar" or mode=="minimize":
             if log : print("astar")
             self.a_star()        
-        
         if log : print("dijkstra")
-        self.all_dijkstra()
-        shortest_route_latlong = [[G.nodes[route_node]['y'],G.nodes[route_node]['x']] for route_node in self.shortest_route]
-        
-        shortestPathStats = [shortest_route_latlong, self.shortest_dist, \
-                            self.computeElevs(self.shortest_route, "gain-only"), self.computeElevs(self.shortest_route, "drop-only")]
-        
-        
-        if (self.mode == "maximize" and self.best[2] == float('-inf')) or (self.mode == "minimize" and self.best[3] == float('-inf')):            
+        self.returnDijkstra()
+        shortestLatLong = [[G.nodes[route_node]['y'],G.nodes[route_node]['x']] for route_node in self.shortestRoute]
+        shortestPathStats = [shortestLatLong, self.shortestDist, \
+                            self.getElevation(self.shortestRoute, "gain"), self.getElevation(self.shortestRoute, "drop")]
+        if (self.mode == "maximize" and self.bestPath[2] == float('-inf')) or (self.mode == "minimize" and self.bestPath[3] == float('-inf')):            
             return shortestPathStats, [[], 0.0, 0, 0]
+        self.bestPath[0] = [[G.nodes[route_node]['y'],G.nodes[route_node]['x']] for route_node in self.bestPath[0]]
         
-        
-        #print(self.best)
-        self.best[0] = [[G.nodes[route_node]['y'],G.nodes[route_node]['x']] for route_node in self.best[0]]
-        #print("shortest_path 6 :: ", self.best)
-        
-        #print("===>end", self.best[1:])
-        return shortestPathStats, self.best
+        print("===>end", self.bestPath[1:])
+        return shortestPathStats, self.bestPath
