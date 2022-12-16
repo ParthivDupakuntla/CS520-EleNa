@@ -154,7 +154,7 @@ function displayRouteonMap(path){
 }
 
 
-function showPathOnMap(path, distance, elevation) {
+function showPathOnMap(path, distance, gainShort, elenavDist, gainElenav) {
   var source = path[0]
   var dest = path[path.length-1]
 
@@ -181,7 +181,7 @@ function showPathOnMap(path, distance, elevation) {
     }
   });
 
-  setStatistics(distance, elevation);
+  setStatistics(distance, gainShort, elenavDist, gainElenav);
 }
 
 
@@ -207,8 +207,9 @@ function submit(){
               best_path = result['elevation_route']
               distance = result['shortDist']
               gainShort = result['gainShort']
-              elevation = result['elenavDist']
-              showPathOnMap(best_path, distance, elevation);
+              elenavDist = result['elenavDist']
+              gainElenav = result['gainElenav']
+              showPathOnMap(best_path, distance, gainShort, elenavDist, gainElenav);
               // displayRouteonMap(best_path)
               console.log(best_path)
             },
@@ -250,8 +251,9 @@ function formValidation(){
   return true;
 }
 
-function setStatistics(distance, elevation) {
-  var routeStats = "<h1> Route Statistics </h1> <br> Total Distance: " + distance.toFixed(4) + " m<br><br>Elevation Gain: " + elevation.toFixed(4) +" m";
+function setStatistics(distance, gainShort, elenavDist, gainElenav) {
+  var dist = distance + elenavDist;
+  var routeStats = "<h1> Route Statistics </h1> <br> Shortest Path Distance: " + distance.toFixed(4) + " m<br><br>Shortest Path Elevation gain: "+gainShort.toFixed(4) + "m<br><br>Elevation Distance: " + dist.toFixed(4) +"m<br><br>Elevation Distance gain: " + gainElenav.toFixed(4) +"m";
   document.getElementById("statistics").innerHTML = routeStats;
   document.getElementById("statistics").style["display"]='block';
   document.getElementById("map-row").classList.remove("col-lg-12");
