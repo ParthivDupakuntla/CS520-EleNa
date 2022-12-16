@@ -96,7 +96,9 @@ function reset() {
 
 }
 
-function showPathOnMap(source, dest, path, distance, elevation) {
+function showPathOnMap(path, distance, elevation) {
+  var source = path[0]
+  var dest = path[path.length-1]
   path_points = []
   for (let i = 3; i < path.length-3; i++){
     var lat = path[i][0];
@@ -143,35 +145,13 @@ function submit(){
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function(result) {
-              best_path = result['elevation_route']['geometry']['coordinates']
+              best_path = result['elevation_route']
               distance = result['shortDist']
               gainShort = result['gainShort']
               elevation = result['elenavDist']
-
-              console.log(typeof best_path)
-
-              var len = best_path.length-1
-
-              var source = best_path[0]
-              var dest = best_path[len]
-
-              var ptA = new google.maps.LatLng(source['0'], source['1']);
-              var ptB = new google.maps.LatLng(dest['0'], dest['1']);
-
-              const path_points = [];
-
-              for (let i = len; i >=0 ; i--) {
-                  var lat = best_path[i]['0']
-                  var long = best_path[i]['1']
-                  path_points.push({
-                    location: new google.maps.LatLng(lat, long),
-                    stopover: false,
-                  });
-              }
-
-              initMap(ptA, ptB, path_points)
-              showPathOnMap(source, dest, best_path, distance, elevation);
-
+              showPathOnMap(best_path, distance, elevation);
+              console.log(best_path)
+              //displayRoute(best_path)
             },
             error: function(result) {
                 alert('Bad Request !!!');
@@ -180,34 +160,39 @@ function submit(){
     }
 }
 
-function initMap(ptA, ptB, path_points) {
-    var myOptions = {
-        zoom: 7,
-        center: ptA
-    },
+function displayRoute(best_path) {
+    var len = best_path.length-1
+    var source = best_path[0]
+    var dest = best_path[len-1]
+    var ptA = new google.maps.LatLng(source['0'], source['1']);
+    var ptB = new google.maps.LatLng(dest['0'], dest['1']);
+    const path_points = [];
+    for (let i = len; i >=0 ; i--) {
+        var lat = best_path[i]['0']
+        var long = best_path[i]['1']
+        path_points.push({
+          location: new google.maps.LatLng(lat, long),
+          stopover: false,
+        });
+    }
     // Instantiate a directions service.
-    service = new google.maps.DirectionsService,
+    var service = new google.maps.DirectionsService,
     renderer = new google.maps.DirectionsRenderer({
         map: map
     });
-
     // get route from A to B
-    displayRoute(service, renderer, ptA, ptB, path_points);
-}
-
-function displayRoute(service, renderer, ptA, ptB, path_points) {
-  service.route({
+    service.route({
       origin: ptA,
       destination: ptB,
       waypoints: path_points,
       travelMode: google.maps.TravelMode.WALKING
-  }, function (response, status) {
-      if (status == google.maps.DirectionsStatus.OK) {
-          renderer.setDirections(response);
-      } else {
-          window.alert('Directions request failed due to ' + status);
-      }
-  });
+      }, function (response, status) {
+          if (status == google.maps.DirectionsStatus.OK) {
+              renderer.setDirections(response);
+          } else {
+              window.alert('Directions request failed due to ' + status);
+          }
+      });
 }
 
 function formValidation(){

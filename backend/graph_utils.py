@@ -1,21 +1,18 @@
 import osmnx as ox
-import networkx as nx
 import numpy as np
 import pickle as p
 import os
+import googlemaps
 
 
-class Model:
+class GraphUtils:
     def __init__(self):
-        print("Model Initialized")        
         self.GOOGLEAPIKEY="AIzaSyB_uAGX5M9hc8MdLnocMFJML4yaxAg9HsU"
-        if os.path.exists("./graph.p"):
-            self.G = p.load( open( "graph.p", "rb" ) )
-            self.init = True
-            print("Loaded Graph")
-        else:
-            self.init = False
+        self.gmaps = googlemaps.Client(key=self.GOOGLEAPIKEY)
 
+    def get_location_from_address(self, address):
+        return (self.gmaps.geocode(address)[0]['geometry']['location']['lat'], 
+                                self.gmaps.geocode(address)[0]['geometry']['location']['lng'])
     
     def calculate_spherical_distance(self, lat1, lon1, lat2, lon2, r=6371008.8):
         # Convert degrees to radians
@@ -30,31 +27,29 @@ class Model:
         d = 2*r*np.arcsin(np.sqrt(a))
         return d
 
-    def addDistFromDest(self,G,end_location):
-        print(end_location)
-        nn = ox.distance.nearest_nodes(G, end_location[1], end_location[0], return_dist=False)
-        end_node=G.nodes[nn]
-        print(end_node)
-        
-        lat1=end_node['y']
-        lon1=end_node['x']
-        for node,data in G.nodes(data=True):
-            lat2=G.nodes[node]['y']
-            lon2=G.nodes[node]['x']
-            #print("-----------------", node,data,lat1,lon1,lat2,lon2,distance)        
-            data['distFromDest'] = self.calculate_spherical_distance(lat1,lon1,lat2,lon2)
-        return G
-
     def get_graph(self, start_location, end_location):
+        
+        
         print("Coordinates inside get_graph :: ", start_location, end_location)
-        if not self.init:
-            print("Downloading Graph")
+        if os.path.exists("./graph.p"):
+            self.G = p.load( open( "graph.p", "rb" ) )
+            print("Found Existing Graph")
+        else:
+            print("Did not find existing Graph. Downloading !!!!")
             self.G = ox.graph_from_point(start_location, dist=30000, dist_type="network", network_type='walk')
             print("get_graph self G :: ", self.G)
             self.G = ox.elevation.add_node_elevations_google(self.G, api_key=self.GOOGLEAPIKEY)
-            print("hellop", start_location, self.G)
             p.dump(self.G, open("graph.p", "wb" ) )
-            self.init = True
             print("Saved Graph")
-        self.G = self.addDistFromDest(self. G,end_location)
+        
+        
+        end_node = ox.distance.nearest_nodes(self.G, end_location[1], end_location[0], return_dist=False)
+        end_location = self.G.nodes[end_node]        
+        lat1=end_location['y']
+        lon1=end_location['x']
+        for node,data in self.G.nodes(data=True):
+            lat2=self.G.nodes[node]['y']
+            lon2=self.G.nodes[node]['x']
+            data['distFromDest'] = self.calculate_spherical_distance(lat1,lon1,lat2,lon2)
+        # self.G = self.addDistFromDest(self.G,end_location)
         return self.G
