@@ -60,6 +60,6 @@ class Algorithms:
             return shortestPathStats, [[], 0.0, 0, 0]
         self.bestPath[0] = [[G.nodes[route_node]['y'],G.nodes[route_node]['x']] for route_node in self.bestPath[0]]
         
-        print("===>end", self.bestPath[1:])
+        #print("===>end", self.bestPath[1:])
         return shortestPathStats, self.bestPath
 

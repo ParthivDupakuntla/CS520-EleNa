@@ -6,6 +6,7 @@ import numpy as np
 #Helper Functions : getCost, getElevation, getRoute, pathRebuild
 def getCost(G, n1, n2, mode = "vanilla"):
     """ defines the cost between two nodes """
+    
     if n1 is None or n2 is None : return
     if mode == "gain":
         return max(0.0, G.nodes[n2]["elevation"] - G.nodes[n1]["elevation"])
