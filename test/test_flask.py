@@ -4,8 +4,6 @@ from flask import jsonify
 from src.webapp import app
 # pytest test/test_flask.py -W ignore::DeprecationWarning
 
-
-
 @pytest.fixture
 def client():
     with app.test_client() as client:
