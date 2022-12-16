@@ -71,12 +71,8 @@ function addMarker(point, map, markers, bounds, key_val) {
 }
 
 function removeMarker() {
-  markers.get('source').setMap(null);
-  markers.get('dest').setMap(null);
-  markers.clear();
-  map.setCenter({ lat: 42.3832, lng: -72.5299 });
-  map.setZoom(12);
-  renderer.setMap(map);
+  initAutocomplete();
+
 }
 
 function removePath() {
@@ -97,6 +93,7 @@ function reset() {
     resetStatistics();
     removeMarker();
     removePath();
+
 }
 
 function showPathOnMap(source, dest, path, distance, elevation) {
@@ -130,7 +127,9 @@ function showPathOnMap(source, dest, path, distance, elevation) {
 function submit(){
     var best_path;
     var validation = formValidation();
+
     if(validation == true) {
+        initAutocomplete();
           $.ajax({
             type: "POST",
             url: "/test",
@@ -241,7 +240,7 @@ function formValidation(){
 }
 
 function setStatistics(distance, elevation) {
-  var routeStats = "<h1> Route Statistics </h1> <br> Total Distance: " + distance + " m<br><br>Elevation Gain: " + elevation +" m";
+  var routeStats = "<h1> Route Statistics </h1> <br> Total Distance: " + distance.toFixed(4) + " m<br><br>Elevation Gain: " + elevation.toFixed(4) +" m";
   document.getElementById("statistics").innerHTML = routeStats;
   document.getElementById("statistics").style["display"]='block';
   document.getElementById("map-row").classList.remove("col-lg-12");
