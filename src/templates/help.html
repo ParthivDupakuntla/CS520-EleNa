@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EleNa - Help</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<script type="text/javascript" src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
+<script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<style>
+
+        .about{
+        padding:2rem;
+        margin:3rem;
+        }
+
+</style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row navbar-expand-lg navbar-dark bg-dark shadow-sm p-1">
+        <center>
+            <a href="#" class="navbar-brand">
+                <span class="font-weight-bold">EleNa: Elevation-based Navigation</span>
+            </a>
+        </center>
+    </div>
+
+<div id="about">
+    Current routing systems’ shortest path is not necessarily the shortest path with elevation gain considered.
+    The goal of this project is to design a navigation system that takes the elevation gain of a route into account.
+    We consider two features of elevation gain - maximum elevation gain and minimum elevation gain.<br/><br>
+    <h3> Fields Description:</h3>
+    <ul>
+        <li> <b>Source</b>: Enter the starting location </li>
+        <li> <b>Destination</b>: Enter the ending location </li>
+        <li> <b>Algorithm</b>: Select Algorithm from the drop-down menu for calculating the route. Currently supported algorithms are A star and Dijkstra.</li>
+        <li> <b>Percentage of elevation gain</b>: It limits the resultant route to x% of the shortest path</li>
+        <li> <b> </b></li>
+    </ul>
+</div>
+</div>
+
+</body>
+</html>
