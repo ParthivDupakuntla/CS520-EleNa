@@ -9,25 +9,13 @@ app.config.from_object(__name__)
 
 app.config.from_envvar('APP_CONFIG_FILE', silent=True)
 
-init = False
-G, graphUtils, algorithms = None, None, None
-
-def initializeAllModules():
-    global graphUtils, init
-    if init is False:
-        graphUtils = GraphUtils()
-        init = True
-
-
 @app.route("/")
 def home():
-    initializeAllModules()
     return render_template("index.html")
 
-@app.route('/test', methods=['POST'])
-def test():
-    global init, G, graphUtils, algorithms
-    initializeAllModules()
+@app.route('/find_route', methods=['POST'])
+def findRoute():
+    graphUtils = GraphUtils()
     try:
         data = request.json
     except:
@@ -46,10 +34,8 @@ def test():
     try:
         source_coordinates = graphUtils.get_location_from_address(source)
         destination_coordinates = graphUtils.get_location_from_address(destination)
-        #print("Coordinates :: ", source_coordinates, destination_coordinates)
-        
-        G = graphUtils.get_graph(source_coordinates, destination_coordinates)
-        algorithms = Algorithms(G, pl = pathlimit, mode = elevationmode)
+        graph = graphUtils.getGraphOject(source_coordinates, destination_coordinates)
+        algorithms = Algorithms(graph, pl = pathlimit, mode = elevationmode)
         shortestPath, elevPath = algorithms.shortest_path(source_coordinates, 
                                 destination_coordinates, 
                                 pathlimit ,
@@ -59,17 +45,6 @@ def test():
     except:
         return "Bad Request"
     try:
-        if shortestPath is None and elevPath is None:
-            data = {"elevation_route" : [] , 
-                    "shortest_route" : [],
-                    "shortDist" : 0,
-                    "gainShort" : 0,
-                    "dropShort" : 0,
-                    "elenavDist" : 0,
-                    "gainElenav" : 0,
-                    "dropElenav" :0
-                    }
-            return data
         data = {"elevation_route" : elevPath[0], 
                 "shortest_route" : shortestPath[0],
                 "shortDist" : shortestPath[1],

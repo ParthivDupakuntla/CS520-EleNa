@@ -27,21 +27,16 @@ class GraphUtils:
         d = 2*r*np.arcsin(np.sqrt(a))
         return d
 
-    def get_graph(self, start_location, end_location):
-        
-        
-        print("Coordinates inside get_graph :: ", start_location, end_location)
+    def getGraphOject(self, start_location, end_location):
         if os.path.exists("./graph.p"):
             self.G = p.load( open( "graph.p", "rb" ) )
             print("Found Existing Graph")
         else:
             print("Did not find existing Graph. Downloading !!!!")
             self.G = ox.graph_from_point(start_location, dist=30000, dist_type="network", network_type='walk')
-            print("get_graph self G :: ", self.G)
             self.G = ox.elevation.add_node_elevations_google(self.G, api_key=self.GOOGLEAPIKEY)
             p.dump(self.G, open("graph.p", "wb" ) )
-            print("Saved Graph")
-        
+            print("Saved Graph !!!!")
         
         end_node = ox.distance.nearest_nodes(self.G, end_location[1], end_location[0], return_dist=False)
         end_location = self.G.nodes[end_node]        
@@ -51,5 +46,4 @@ class GraphUtils:
             lat2=self.G.nodes[node]['y']
             lon2=self.G.nodes[node]['x']
             data['distFromDest'] = self.calculate_spherical_distance(lat1,lon1,lat2,lon2)
-        # self.G = self.addDistFromDest(self.G,end_location)
         return self.G
