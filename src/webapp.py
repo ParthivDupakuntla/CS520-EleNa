@@ -1,5 +1,5 @@
 from . import app
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response, jsonify
 import osmnx as ox
 from backend.algorithms import Algorithms
 from backend.graph_utils import GraphUtils
@@ -19,8 +19,10 @@ def findRoute():
     try:
         data = request.json
     except:
-        return "Bad Request"
+        return make_response("The request is not json", 400)
+
     try:
+        print(data)
         source = data['source']
         destination = data['dest']
         pathlimit = float(data['percent'])
@@ -29,7 +31,7 @@ def findRoute():
         assert(algorithm in {"astar","dijkstra"})
         assert(elevationmode in {"minimize","maximize"})
     except:
-        return "Bad Request"
+        return make_response("The request does not have all required fields", 400)
 
     try:
         source_coordinates = graphUtils.get_location_from_address(source)
