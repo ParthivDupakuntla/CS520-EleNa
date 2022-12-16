@@ -13,6 +13,10 @@ app.config.from_envvar('APP_CONFIG_FILE', silent=True)
 def home():
     return render_template("index.html")
 
+@app.route("/help")
+def help():
+    return render_template("help.html")
+
 @app.route('/find_route', methods=['POST'])
 def findRoute():
     graphUtils = GraphUtils()
