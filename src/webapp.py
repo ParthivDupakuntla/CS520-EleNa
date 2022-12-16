@@ -30,7 +30,7 @@ def create_geojson(coordinates):
 
     return geojson
 
-def create_data(start_location, end_location, x, min_max,algorithm):
+def create_data(start_location, end_location, pl, min_max,algorithm):
     """
     Prepares the data for the routes to be plotted. 
     """
@@ -38,8 +38,8 @@ def create_data(start_location, end_location, x, min_max,algorithm):
     
     M = Model()
     G = M.get_graph(start_location, end_location)
-    algorithms = Algorithms(G, x = x, mode = min_max)
-    shortestPath, elevPath = algorithms.shortest_path(start_location, end_location, x,algo=algorithm, mode = min_max, log=True)
+    algorithms = Algorithms(G, pl = pl, mode = min_max)
+    shortestPath, elevPath = algorithms.shortest_path(start_location, end_location, pl,algo=algorithm, mode = min_max, log=True)
     print("create_data shortestPath:: ", shortestPath)
     print("-----------------------------------------------------------------------------------------------------------------")
     print("create_data elevPath:: ", elevPath)
