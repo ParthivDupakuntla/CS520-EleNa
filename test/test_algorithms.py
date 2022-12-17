@@ -12,8 +12,8 @@ import networkx as nx
 @pytest.fixture
 def input_for_test():
     G = nx.Graph()
-    start = (42.35083570082981, -72.52734001524475)#162
-    end = (42.35763553455415, -72.51708210902385)#groff park
+    start = (42.350693, -72.5273722)#162
+    end = (42.3576022, -72.5171551)#groff park
     for i in range(6):
         G.add_node(i, elevation = 0.0)
     edges = [(0,1,6.0), (1,2,1), (0,2,1.8), (0,3,1.7), (0,5,8), (2,5,4), (2,3,1.6), (3,4,1.9), (3,5,4), (4,5,2)]
@@ -38,18 +38,20 @@ def test_get_graph_di(input_for_test):
     G = grph.getGraphOject(start, end)
     assert isinstance(G, nx.classes.multidigraph.DiGraph)
 
-# def test_shortest_path(input_for_test):
-#     start, end, G, A = input_for_test
-#     # source, dest = 0,2
-#     # shortestDist = 6.0
-#     # pl = 100.0
-#     #reInit(p.load(open("graph.p", "rb")))
-#     #A.G = G
-#     A.startNode, A.endNode = start, end
-#     pl = 200.0
-#     A.pl = pl/100.0
-#     spStats, bestPath = A.shortest_path(start_location=start, end_location= end, pl = pl, algo = "astar", mode = "maximize", log = False )
-#     assert bestPath[1:] == [12.591999999999992, 6.486999999999995, 6.104999999999997]
+def test_shortest_path(input_for_test):
+    start, end, G, A = input_for_test
+    # source, dest = 0,2
+    # shortestDist = 6.0
+    # pl = 100.0
+    #reInit(p.load(open("graph.p", "rb")))
+    #A.G = G
+    grph = GraphUtils()
+    start, end, G1, A = input_for_test
+    G = grph.getGraphOject(start, end)
+    A = Algorithms(G, pl = 200.0)
+    A.startNode, A.endNode = start, end
+    spStats, bestPath = A.shortest_path(start_location=start, end_location= end, pl = 200.0, algo = "astar", mode = "maximize", log = False )
+    assert bestPath[1:] == [12.321999999999996, 6.201999999999998, 6.119999999999997]
 
 def test_getRoute1(input_for_test):
     start, end, G, A = input_for_test
