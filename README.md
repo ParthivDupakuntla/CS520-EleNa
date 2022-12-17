@@ -12,4 +12,12 @@ We introduce a design constraint that limits the resultant route to x% of the sh
 2. Run './run.sh' for running the server
 
 #### Running unit tests
-Run 'pytest' after going inside the directory to run all the tests
+1. There are 2 test files under the test directory, one for algorithms and one for flask app
+2. Run "python3 -m pytest" to run all the test cases
+3. Please find attached the test session summary in the Project Report
+
+#### Project Team / Contributors
+1. Aditi Mittal
+2. Chaitanya Rajesh Banala
+3. Stuti Ajmera
+4. Venkata Bramara Parthiv Dupakuntla
