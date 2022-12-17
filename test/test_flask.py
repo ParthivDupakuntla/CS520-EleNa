@@ -25,7 +25,7 @@ class TestFlaskApp:
             '/find_route',
             data=None,
         )
-        assert response.data.decode("utf-8") == "The request is not json"
+        assert response.data.decode("utf-8") == "The request does not have all required fields"
         assert response.status_code == 400
 
     def test_find_route_wrong_request(self, client):
@@ -34,7 +34,7 @@ class TestFlaskApp:
             data="",
             follow_redirects=True
         )
-        assert response.data.decode("utf-8") == "The request is not json"
+        assert response.data.decode("utf-8") == "The request does not have all required fields"
         assert response.status_code == 400
 
     def test_find_route_with_no_arguments(self, client):
@@ -43,7 +43,7 @@ class TestFlaskApp:
             data=dict(),
             follow_redirects=True
         )
-        assert response.data.decode("utf-8") == "The request is not json"
+        assert response.data.decode("utf-8") == "The request does not have all required fields"
         assert response.status_code == 400
     
 
