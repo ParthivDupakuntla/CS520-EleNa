@@ -42,12 +42,11 @@ def findRoute():
         destination_coordinates = graphUtils.get_location_from_address(destination)
         graph = graphUtils.getGraphOject(source_coordinates, destination_coordinates)
         algorithms = Algorithms(graph, pl = pathlimit, mode = elevationmode)
-        shortestPath, elevPath = algorithms.shortest_path(source_coordinates, 
+        shortestPath, elevPath = algorithms.optimalPath(source_coordinates, 
                                 destination_coordinates, 
                                 pathlimit ,
                                 algo=algorithm, 
-                                mode = elevationmode, 
-                                log=True)
+                                mode = elevationmode)
     except:
         return make_response("Unable to run algorithms", 400)
     try:
