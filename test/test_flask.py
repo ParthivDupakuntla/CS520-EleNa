@@ -25,7 +25,7 @@ class TestFlaskApp:
             '/find_route',
             data=None,
         )
-        assert response.data.decode("utf-8") == "The request does not have all required fields"
+        assert response.data.decode("utf-8") == "The request is not json"
         assert response.status_code == 400
 
     def test_find_route_wrong_request(self, client):
@@ -34,7 +34,7 @@ class TestFlaskApp:
             data="",
             follow_redirects=True
         )
-        assert response.data.decode("utf-8") == "The request does not have all required fields"
+        assert response.data.decode("utf-8") == "The request is not json"
         assert response.status_code == 400
 
     def test_find_route_with_no_arguments(self, client):
@@ -43,19 +43,18 @@ class TestFlaskApp:
             data=dict(),
             follow_redirects=True
         )
-        assert response.data.decode("utf-8") == "The request does not have all required fields"
+        assert response.data.decode("utf-8") == "The request is not json"
         assert response.status_code == 400
     
 
-    # def test_find_route(self, client):
-    #     with app.app_context():
+    def test_find_route_with_missing_arguments(self, client):
+        with app.app_context():
 
-    #         data_dict_ = {'source': '115 Brittany Manor Drive, Amherst, MA, USA', 
-    #         'dest': 'Groff Park, Mill Lane, Amherst, MA, USA', 
-    #         'algo': 'astar', 
-    #         'percent': '150', 
-    #         'elevationtype': 'minimize'}
+            data_dict_ = {'source': '115 Brittany Manor Drive, Amherst, MA, USA', 
+            'dest': 'Groff Park, Mill Lane, Amherst, MA, USA', 
+            'algo': 'astar',}
 
+<<<<<<< Updated upstream
     #         response =  client.post(
     #             '/find_route',
     #             data = data_dict_,
@@ -63,3 +62,11 @@ class TestFlaskApp:
     #         )
     #         print(response)
     #         assert response.status_code == 200
+=======
+            response =  client.post(
+                '/find_route',
+                data = data_dict_,
+                follow_redirects=True
+            )
+            assert response.status_code == 400
+>>>>>>> Stashed changes
