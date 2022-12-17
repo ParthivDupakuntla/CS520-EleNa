@@ -25,7 +25,6 @@ def dijkstra_helper(G, pl, shortestDist, mode, startNode, endNode):
         if node not in visited:
             visited.add(node)
             if node == endNode:
-                print("helloooooo ", currDist)
                 return currPriority, currDist, parentDict
 
             for nei in G.neighbors(node):
