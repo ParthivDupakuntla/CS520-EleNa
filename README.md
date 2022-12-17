@@ -9,4 +9,7 @@ We introduce a design constraint that limits the resultant route to x% of the sh
 
 #### Execution
 1. Run 'python3 -m pip install requirements.txt'
-2. 
+2. Run './run.sh' for running the server
+
+#### Running unit tests
+Run 'pytest' after going inside the directory to run all the tests
