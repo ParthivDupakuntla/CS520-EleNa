@@ -54,19 +54,9 @@ class TestFlaskApp:
             'dest': 'Groff Park, Mill Lane, Amherst, MA, USA', 
             'algo': 'astar',}
 
-<<<<<<< Updated upstream
-    #         response =  client.post(
-    #             '/find_route',
-    #             data = data_dict_,
-    #             follow_redirects=True
-    #         )
-    #         print(response)
-    #         assert response.status_code == 200
-=======
             response =  client.post(
                 '/find_route',
                 data = data_dict_,
                 follow_redirects=True
             )
             assert response.status_code == 400
->>>>>>> Stashed changes
