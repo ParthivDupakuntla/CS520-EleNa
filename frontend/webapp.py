@@ -4,7 +4,7 @@ import osmnx as ox
 from backend.algorithms import Algorithms
 from backend.graph_utils import GraphUtils
 
-app = Flask(__name__, static_url_path = '', static_folder = "../frontend/static", template_folder = "../frontend/templates")
+app = Flask(__name__, static_url_path = '', static_folder = "./static", template_folder = "./templates")
 app.config.from_object(__name__)
 
 app.config.from_envvar('APP_CONFIG_FILE', silent=True)
