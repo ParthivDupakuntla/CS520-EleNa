@@ -26,6 +26,7 @@ function initAutocomplete() {
   addMarker(dest, map, markers, bounds, 'dest');
 }
 
+// function for removing markers when source/destination are added/changed
 function addMarker(point, map, markers, bounds, key_val) {
 
     var auto = new google.maps.places.Autocomplete(point);
@@ -70,11 +71,13 @@ function addMarker(point, map, markers, bounds, key_val) {
     });
 }
 
+// function for removing markers from map(on reset)
 function removeMarker() {
   initAutocomplete();
 
 }
 
+// function for removing path from map(on reset)
 function removePath() {
   renderer.setDirections({routes: []});
   renderer.setMap(null);
@@ -88,6 +91,7 @@ function removePath() {
   renderer.setMap(map);
 }
 
+// Reset function called when reset button is clicked
 function reset() {
     document.getElementById("userForm").reset();
     resetStatistics();
@@ -95,8 +99,6 @@ function reset() {
     removePath();
 
 }
-
-
 
 
 function displayRouteonMap(path){
@@ -153,7 +155,7 @@ function displayRouteonMap(path){
   }
 }
 
-
+// show path on map using the results obtained from backend
 function showPathOnMap(path, distance, gainShort, elenavDist, gainElenav) {
   var source = path[0]
   var dest = path[path.length-1]
@@ -184,7 +186,7 @@ function showPathOnMap(path, distance, gainShort, elenavDist, gainElenav) {
   setStatistics(distance, gainShort, elenavDist, gainElenav);
 }
 
-
+// this function is called when search button is clicked on UI
 function submit(){
     var best_path;
     var validation = formValidation();
@@ -210,7 +212,6 @@ function submit(){
               elenavDist = result['elenavDist']
               gainElenav = result['gainElenav']
               showPathOnMap(best_path, distance, gainShort, elenavDist, gainElenav);
-              // displayRouteonMap(best_path)
               console.log(best_path)
             },
             error: function(result) {
@@ -220,8 +221,7 @@ function submit(){
     }
 }
 
-
-
+// validate user inputs
 function formValidation(){
   var source = document.getElementById("source").value;
   var dest = document.getElementById("dest").value;
@@ -251,6 +251,7 @@ function formValidation(){
   return true;
 }
 
+//set statistics value when submit button is clicked and backend req has been processed
 function setStatistics(distance, gainShort, elenavDist, gainElenav) {
   var dist = distance + elenavDist;
   var routeStats = "<h1> Route Statistics </h1> <br> Shortest Path Distance: " + distance.toFixed(4) + " m<br><br>Shortest Path Elevation gain: "+gainShort.toFixed(4) + "m<br><br>Elevation Distance: " + dist.toFixed(4) +"m<br><br>Elevation Distance gain: " + gainElenav.toFixed(4) +"m";
@@ -260,6 +261,7 @@ function setStatistics(distance, gainShort, elenavDist, gainElenav) {
   document.getElementById("map-row").classList.add("col-lg-9");
 }
 
+//Reset statistics value when reset button is clicked
 function resetStatistics() {
   document.getElementById("statistics").innerHTML = "";
   document.getElementById("statistics").style["display"]='none'

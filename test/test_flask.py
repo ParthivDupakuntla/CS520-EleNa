@@ -1,7 +1,7 @@
 import pytest
 from flask import jsonify
 
-from backend.webapp import app
+from frontend.webapp import app
 # pytest test/test_flask.py -W ignore::DeprecationWarning
 
 @pytest.fixture
