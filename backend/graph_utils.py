@@ -7,7 +7,7 @@ import googlemaps
 
 class GraphUtils:
     def __init__(self):
-        self.GOOGLEAPIKEY="AIzaSyB_uAGX5M9hc8MdLnocMFJML4yaxAg9HsU"
+        self.GOOGLEAPIKEY=""
         self.gmaps = googlemaps.Client(key=self.GOOGLEAPIKEY)
 
     def get_location_from_address(self, address):
