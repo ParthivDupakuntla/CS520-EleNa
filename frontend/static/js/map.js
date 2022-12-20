@@ -49,9 +49,6 @@ function addMarker(point, map, markers, bounds, key_val) {
       markers.set(key_val, marker);
       bounds.extend(marker.position);
       map.fitBounds(bounds);
-
-      var zoom = map.getZoom();
-      map.setZoom(12);
     });
 }
 
