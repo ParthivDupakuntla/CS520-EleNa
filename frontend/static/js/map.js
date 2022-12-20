@@ -2,6 +2,8 @@ var map;
 var markers;
 
 function initAutocomplete() {
+  var source = document.getElementById("source");
+  var dest = document.getElementById("dest");
   service = new google.maps.DirectionsService;
   renderer = new google.maps.DirectionsRenderer({
     polylineOptions: {
@@ -9,8 +11,7 @@ function initAutocomplete() {
     }
   });
 
-  var bounds = new google.maps.LatLngBounds();
-
+  
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 42.3832, lng: -72.5299 },
     zoom: 12,
@@ -18,63 +19,45 @@ function initAutocomplete() {
   });
 
   renderer.setMap(map);
-
-  var source = document.getElementById("source");
-  var dest = document.getElementById("dest");
   markers = new Map();
+  var bounds = new google.maps.LatLngBounds();
   addMarker(source, map, markers, bounds, 'source');
   addMarker(dest, map, markers, bounds, 'dest');
 }
 
 // function for removing markers when source/destination are added/changed
 function addMarker(point, map, markers, bounds, key_val) {
-
     var auto = new google.maps.places.Autocomplete(point);
     auto.bindTo('bounds', map);
-
     google.maps.event.addListener(auto, 'place_changed', function () {
       var place = auto.getPlace();
-
-      const icon = {
+      icon_point = {
         url: place.icon,
+        anchor: new google.maps.Point(17, 35),
+        scaledSize: new google.maps.Size(24, 24),
         size: new google.maps.Size(73, 73),
         origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(24, 24),
       };
 
       var marker = new google.maps.Marker({
         map,
-        icon,
-        title: place.name,
+        icon_point,
         position: place.geometry.location,
+        title: place.name,
       });
 
-      var info = new google.maps.InfoWindow();
-      google.maps.event.addListener(marker, 'click', (function(marker) {
-        return function() {
-            info.setContent(place.name);
-            info.open(map, marker);
-        }
-      })(marker));
-
-      if(markers.has(key_val)) {
-        markers.get(key_val).setMap(null);
-        markers.delete(key_val);
-      }
       markers.set(key_val, marker);
       bounds.extend(marker.position);
       map.fitBounds(bounds);
 
       var zoom = map.getZoom();
-      map.setZoom(zoom > 12 ? 12 : zoom);
+      map.setZoom(12);
     });
 }
 
 // function for removing markers from map(on reset)
 function removeMarker() {
   initAutocomplete();
-
 }
 
 // function for removing path from map(on reset)
@@ -97,9 +80,7 @@ function reset() {
     resetStatistics();
     removeMarker();
     removePath();
-
 }
-
 
 function displayRouteonMap(path){
 
@@ -165,8 +146,7 @@ function showPathOnMap(path, distance, gainShort, elenavDist, gainElenav) {
     var lat = path[i][0];
     var long= path[i][1];
     path_points.push({
-      location: new google.maps.LatLng(lat,long),
-      stopover: false,
+      location: new google.maps.LatLng(lat,long),stopover: false,
     });
   }
 
@@ -182,7 +162,6 @@ function showPathOnMap(path, distance, gainShort, elenavDist, gainElenav) {
       window.alert('Request failed with error ' + status);
     }
   });
-
   setStatistics(distance, gainShort, elenavDist, gainElenav);
 }
 
